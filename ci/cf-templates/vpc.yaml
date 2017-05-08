@@ -79,9 +79,9 @@ Outputs:
     Value: !Ref VPC
   VPCCidr:
     Export:
-      Name: Name: !Sub "${AWS::StackName}-vpccidr"
+      Name: !Sub "${AWS::StackName}-vpccidr"
     Value: !Ref VpcCidr
   SubnetId:
     Export:
-      Name: Name: !Sub "${AWS::StackName}-subnetpublic"
+      Name: !Sub "${AWS::StackName}-subnetpublic"
     Value: !Ref SubnetPublic
