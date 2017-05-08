@@ -1,0 +1,87 @@
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+Parameters:
+  Application:
+    Type: String
+  VpcCidr:
+    Type: String
+    Default: 172.16.0.0/16
+  SubnetCidr:
+    Type: String
+    Default: 172.16.0.0/24
+
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: false
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: !Sub "vpc-${Application}"
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub "gateway-${Application}"
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "routetable-${Application}"
+
+  RoutePublic:
+    Type: AWS::EC2::Route
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+      RouteTableId: !Ref RouteTable
+
+  SubnetPublic:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: eu-central-1a
+      CidrBlock: 172.16.0.0/24
+      MapPublicIpOnLaunch: true
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub "subnetpublic-${Application}"
+
+  SubnetPublicRouteTableAss:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetPublic
+
+
+Outputs:
+  VPCId:
+    Export:
+      Name: !Sub "${AWS::StackName}-vpcid"
+    Value: !Ref VPC
+  VPCCidr:
+    Export:
+      Name: Name: !Sub "${AWS::StackName}-vpccidr"
+    Value: !Ref VpcCidr
+  SubnetId:
+    Export:
+      Name: Name: !Sub "${AWS::StackName}-subnetpublic"
+    Value: !Ref SubnetPublic
