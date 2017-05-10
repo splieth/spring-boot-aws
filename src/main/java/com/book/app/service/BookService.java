@@ -1,4 +1,4 @@
-package com.book.app.controller;
+package com.book.app.service;
 
 import com.book.app.domain.Book;
 import com.book.app.repository.BookRepository;
@@ -17,13 +17,13 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
 @RequestMapping("/books")
-public class BookController {
+public class BookService {
     private final BookRepository bookRepo;
 
-    private static final Logger logger = LoggerFactory.getLogger(BookController.class);
+    private static final Logger logger = LoggerFactory.getLogger(BookService.class);
 
     @Autowired
-    public BookController(BookRepository bookRepo) {
+    public BookService(BookRepository bookRepo) {
         this.bookRepo = bookRepo;
     }
 
