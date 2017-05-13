@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository {
-    Book add(Book b);
+    Book insert(Book b);
 
     List<Book> list();
 
-    Optional<Book> get(String id);
+    Optional<Book> findOne(String id);
 }

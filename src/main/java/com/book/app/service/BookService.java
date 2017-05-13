@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -29,7 +28,7 @@ public class BookService {
 
     @PostMapping(produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Book> addBook(@RequestBody Book b) {
-        bookRepo.add(b);
+        bookRepo.insert(b);
         return new ResponseEntity<Book>(b, HttpStatus.CREATED);
     }
 
@@ -42,16 +41,11 @@ public class BookService {
 
     @GetMapping(value = "/{id}", produces = APPLICATION_JSON_VALUE)
     public ResponseEntity<Optional<Book>> getBook(@PathVariable String id) {
-        Optional<Book> b = bookRepo.get(id);
+        Optional<Book> b = bookRepo.findOne(id);
         HttpStatus status = b.isPresent() ? HttpStatus.OK : HttpStatus.NOT_FOUND;
-        Book book;
 
-        try {
-            book = b.get();
-        } catch (NoSuchElementException e) {
-            book = null;
-        }
+        logger.debug("Looking for %s; Got %s", id, status.toString());
 
-        return new ResponseEntity(book, status);
+        return new ResponseEntity(b.orElse(null), status);
     }
 }

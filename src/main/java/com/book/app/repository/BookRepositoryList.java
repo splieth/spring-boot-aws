@@ -20,7 +20,7 @@ public class BookRepositoryList implements BookRepository {
     }
 
     @Override
-    public Book add(Book b) {
+    public Book insert(Book b) {
         bookList.add(b);
         return b;
     }
@@ -31,13 +31,12 @@ public class BookRepositoryList implements BookRepository {
     }
 
     @Override
-    public Optional<Book> get(String id) {
-        Optional<Book> book = Optional.empty();
-        for (Book b : bookList) {
-            if (b.getId().equals(id)) {
-                book = Optional.ofNullable(b);
-            }
-        }
+    public Optional<Book> findOne(String id) {
+        Optional<Book> book = Optional.ofNullable(bookList.stream()
+                .filter(b -> b.getId().equals(id))
+                .findFirst()
+        ).orElse(null);
+
         return book;
     }
 }
