@@ -11,4 +11,6 @@ public interface BookRepository {
     List<Book> list();
 
     Optional<Book> findOne(String id);
+
+    void delete(String id);
 }

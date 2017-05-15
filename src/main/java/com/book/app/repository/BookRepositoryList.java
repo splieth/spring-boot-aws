@@ -39,4 +39,9 @@ public class BookRepositoryList implements BookRepository {
 
         return book;
     }
+
+    @Override
+    public void delete(String id) {
+        bookList.removeIf(b -> b.getId().equals(id));
+    }
 }

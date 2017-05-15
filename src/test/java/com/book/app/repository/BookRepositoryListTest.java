@@ -71,4 +71,19 @@ public class BookRepositoryListTest {
         assertEquals(bookRepo.list().get(0).getTitle(), "Some Title");
         assertEquals(bookRepo.list().get(1).getTitle(), "Some Strange Title");
     }
+
+    // delete
+    @Test
+    public void deleteRemovesElementFromList() {
+        bookRepo = new BookRepositoryList();
+        Book someBook = new Book("Some Author", "Some Title", 19.99);
+        Book someOtherBook = new Book("Some Other Author", "Some Strange Title", 99.99);
+        bookRepo.insert(someBook);
+        bookRepo.insert(someOtherBook);
+
+        bookRepo.delete(someOtherBook.getId());
+
+        assertEquals(bookRepo.list().size(), 1);
+        assertEquals(someBook.getId(), bookRepo.list().get(0).getId());
+    }
 }
