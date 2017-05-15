@@ -1,0 +1,29 @@
+---
+
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  Application:
+    Type: String
+
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub "com.books.${Application}"
+
+  Dynamo:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${Application}-db"
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 5

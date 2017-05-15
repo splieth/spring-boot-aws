@@ -21,7 +21,7 @@ fi
 
 REGION=${REGION:-'eu-central-1'}
 
-bundle check || bundle install
+bundle check || bundle install --quiet
 
 bundle exec autostacker24 update --stack ${STACK_NAME} \
                                  --region ${REGION} \
