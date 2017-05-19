@@ -1,8 +1,9 @@
 package com.book.app.repository;
 
 import com.book.app.domain.Book;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.util.Optional;
 
@@ -12,30 +13,35 @@ import static org.testng.Assert.*;
 public class BookRepositoryListTest {
 
     private BookRepositoryList bookRepo;
+    private Book someBook;
+    private Book someOtherBook;
+
+    // Meta
+    @BeforeClass
+    public void setUp() {
+        bookRepo = new BookRepositoryList();
+        someBook = new Book("Some Author", "Some Title", 199.99);
+        someOtherBook= new Book("Some Other Author", "Some Other Title", 199.99);
+    }
+
+    @AfterTest
+    public void cleanUp() {
+        bookRepo.deleteAll();
+    }
 
     // insert
     @Test
     public void insertShouldInsert() throws Exception {
-        bookRepo = new BookRepositoryList();
-        String someAuthor = "Some Author";
-        String someTitle = "Some Title";
-        Double somePrice = 199.99;
-        Book someInsert = new Book(someAuthor, someTitle, somePrice);
-        Book someResponse = bookRepo.insert(someInsert);
+        Book someResponse = bookRepo.insert(someBook);
 
-        assertEquals(someResponse.getAuthor(), someAuthor);
-        assertEquals(someResponse.getTitle(), someTitle);
-        assertEquals(someResponse.getPrice(), somePrice);
+        assertEquals(someResponse.getAuthor(), someBook.getAuthor());
+        assertEquals(someResponse.getTitle(), someBook.getTitle());
+        assertEquals(someResponse.getPrice(), someBook.getPrice());
     }
 
     // findOne
     @Test
     public void findOnefindsObject() throws Exception {
-        bookRepo = new BookRepositoryList();
-        String someAuthor = "Some Author";
-        String someTitle = "Some Title";
-        Double somePrice = 199.99;
-        Book someBook = new Book(someAuthor, someTitle, somePrice);
         Optional<Book> result = bookRepo.findOne(bookRepo.insert(someBook).getId());
 
         assertTrue(result.isPresent());
@@ -44,7 +50,6 @@ public class BookRepositoryListTest {
 
     @Test
     public void findOnefindsNothing() throws Exception {
-        bookRepo = new BookRepositoryList();
         Optional<Book> result = bookRepo.findOne("some-id");
 
         assertFalse(result.isPresent());
@@ -53,16 +58,11 @@ public class BookRepositoryListTest {
     // list
     @Test
     public void listIsEmpty() {
-        bookRepo = new BookRepositoryList();
-
         assertTrue(bookRepo.list().isEmpty());
     }
 
     @Test
     public void listContainsElements() {
-        bookRepo = new BookRepositoryList();
-        Book someBook = new Book("Some Author", "Some Title", 19.99);
-        Book someOtherBook = new Book("Some Other Author", "Some Strange Title", 99.99);
         bookRepo.insert(someBook);
         bookRepo.insert(someOtherBook);
 
@@ -75,9 +75,6 @@ public class BookRepositoryListTest {
     // delete
     @Test
     public void deleteRemovesElementFromList() {
-        bookRepo = new BookRepositoryList();
-        Book someBook = new Book("Some Author", "Some Title", 19.99);
-        Book someOtherBook = new Book("Some Other Author", "Some Strange Title", 99.99);
         bookRepo.insert(someBook);
         bookRepo.insert(someOtherBook);
 
@@ -85,5 +82,14 @@ public class BookRepositoryListTest {
 
         assertEquals(bookRepo.list().size(), 1);
         assertEquals(someBook.getId(), bookRepo.list().get(0).getId());
+    }
+
+    // deleteAll
+    public void deleteAllFlushesList() {
+        bookRepo.insert(someBook);
+        bookRepo.insert(someOtherBook);
+
+        bookRepo.deleteAll();
+        assertEquals(bookRepo.list().size(), 0);
     }
 }
