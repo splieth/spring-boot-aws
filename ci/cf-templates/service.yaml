@@ -1,0 +1,95 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  Application:
+    Type: String
+  AMI:
+    Type: String
+    Default: ami-5b06d634
+  VPCStackName:
+    Type: String
+
+Resources:
+  SecurityGroupApp:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access via http
+      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-vpcid"}
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      Comment: "Install docker and start container"
+      AWS::CloudFormation::Init:
+        configSets:
+            default:
+              - docker
+        docker:
+          packages:
+            yum:
+              docker: []
+          services:
+            sysvinit:
+              docker:
+                enabled: true
+                ensureRunning: true
+    Properties:
+      AssociatePublicIpAddress: true
+      ImageId: !Ref AMI
+      InstanceType: t2.nano
+      InstanceMonitoring: false
+      UserData:
+        "Fn::Base64": !Sub
+          |
+            #!/bin/bash -xe
+
+            /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource LaunchConfiguration --region ${AWS::Region}
+            docker run -dp 8080:8080 counterliero/books
+
+            /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region}
+      SecurityGroups:
+        - !Ref SecurityGroupApp
+
+  AutoscalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: LoadBalancer
+    Properties:
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      LoadBalancerNames:
+        - !Sub "${VPCStackName}-elb"
+      VPCZoneIdentifier:
+        - !ImportValue {"Fn::Sub": "${VPCStackName}-subnetpublic"}
+      DesiredCapacity: 1
+      MinSize: 1
+      MaxSize: 2
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 120
+
+  #######################
+  # ELB
+  #######################
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      LoadBalancerName: !Sub "${VPCStackName}-elb"
+      Subnets:
+        - !ImportValue {"Fn::Sub": "${VPCStackName}-subnetpublic"}
+      SecurityGroups:
+        - !Ref SecurityGroupELB
+      CrossZone: false
+      Listeners:
+      - LoadBalancerPort: 80
+        InstancePort: 8080
+        Protocol: HTTP
+
+  SecurityGroupELB:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security group for ELB"
+      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-vpcid"}
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80

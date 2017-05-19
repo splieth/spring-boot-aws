@@ -26,4 +26,5 @@ bundle check || bundle install --quiet
 bundle exec autostacker24 update --stack ${STACK_NAME} \
                                  --region ${REGION} \
                                  --template ${SCRIPT_DIR}/cf-templates/${TEMPLATE_NAME}.yaml \
-                                 --param Application=${APPLICATION}
+                                 --param Application=${APPLICATION} \
+                                 --param VPCStackName=${STACK_NAME}
