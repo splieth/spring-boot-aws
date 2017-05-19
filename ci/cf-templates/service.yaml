@@ -1,21 +1,21 @@
 ---
 AWSTemplateFormatVersion: "2010-09-09"
 
+
 Parameters:
-  Application:
-    Type: String
   AMI:
     Type: String
-    Default: ami-5b06d634
+    Default: ami-b968bad6
   VPCStackName:
     Type: String
+
 
 Resources:
   SecurityGroupApp:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow access via http
-      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-vpcid"}
+      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-VpcId"}
 
   LaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -45,7 +45,7 @@ Resources:
             #!/bin/bash -xe
 
             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource LaunchConfiguration --region ${AWS::Region}
-            docker run -dp 8080:8080 counterliero/books
+            docker run -dp 8080:8080 counterliero/aws-playground
 
             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource AutoScalingGroup --region ${AWS::Region}
       SecurityGroups:
@@ -57,9 +57,9 @@ Resources:
     Properties:
       LaunchConfigurationName: !Ref LaunchConfiguration
       LoadBalancerNames:
-        - !Sub "${VPCStackName}-elb"
+        - !Sub "${VPCStackName}-LoadBalancer"
       VPCZoneIdentifier:
-        - !ImportValue {"Fn::Sub": "${VPCStackName}-subnetpublic"}
+        - !ImportValue {"Fn::Sub": "${VPCStackName}-SubnetPublicId"}
       DesiredCapacity: 1
       MinSize: 1
       MaxSize: 2
@@ -72,9 +72,9 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancing::LoadBalancer
     Properties:
-      LoadBalancerName: !Sub "${VPCStackName}-elb"
+      LoadBalancerName: !Sub "${VPCStackName}-LoadBalancer"
       Subnets:
-        - !ImportValue {"Fn::Sub": "${VPCStackName}-subnetpublic"}
+        - !ImportValue {"Fn::Sub": "${VPCStackName}-SubnetPublicId"}
       SecurityGroups:
         - !Ref SecurityGroupELB
       CrossZone: false
@@ -87,7 +87,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: "Security group for ELB"
-      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-vpcid"}
+      VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-VpcId"}
       SecurityGroupIngress:
         - IpProtocol: tcp
           CidrIp: 0.0.0.0/0

@@ -9,13 +9,8 @@ if [ -z ${STACK_NAME} ]; then
   exit 1
 fi
 
-if [ -z ${APPLICATION} ]; then
-  echo "APPLICATION is empty, exiting..."
-  exit 1
-fi
-
-if [ -z ${TEMPLATE_NAME} ]; then
-  echo "TEMPLATE_NAME is empty, exiting..."
+if [ -z ${TEMPLATE} ]; then
+  echo "TEMPLATE is empty, exiting..."
   exit 1
 fi
 
@@ -25,6 +20,5 @@ bundle check || bundle install --quiet
 
 bundle exec autostacker24 update --stack ${STACK_NAME} \
                                  --region ${REGION} \
-                                 --template ${SCRIPT_DIR}/cf-templates/${TEMPLATE_NAME}.yaml \
-                                 --param Application=${APPLICATION} \
-                                 --param VPCStackName=${STACK_NAME}
+                                 --template ${SCRIPT_DIR}/cf-templates/${TEMPLATE}.yaml \
+                                 ${@}
