@@ -16,6 +16,11 @@ Resources:
     Properties:
       GroupDescription: Allow access via http
       VpcId: !ImportValue {"Fn::Sub": "${VPCStackName}-VpcId"}
+      SecurityGroupIngress:
+        - IpProtocol: "tcp"
+          FromPort: "8080"
+          ToPort: "8080"
+          CidrIp: !ImportValue {"Fn::Sub": "${VPCStackName}-VpcCidr"}
 
   LaunchConfiguration:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -51,7 +56,7 @@ Resources:
       SecurityGroups:
         - !Ref SecurityGroupApp
 
-  AutoscalingGroup:
+  AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: LoadBalancer
     Properties:
