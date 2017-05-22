@@ -16,7 +16,7 @@ Resources:
   Dynamo:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "${Application}-db"
+      TableName: !Sub "${Application}-table"
       AttributeDefinitions:
       - AttributeName: id
         AttributeType: S

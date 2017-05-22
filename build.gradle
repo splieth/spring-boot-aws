@@ -24,7 +24,10 @@ repositories {
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    compile('com.github.derjust:spring-data-dynamodb:4.5.0')
+    compile('com.amazonaws:aws-java-sdk-dynamodb:1.11.132')
+    compile('org.apache.commons:commons-lang3:3.5')
     compile('com.google.code.gson:gson:2.8.0')
     compile('org.testng:testng:6.10')
-    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
